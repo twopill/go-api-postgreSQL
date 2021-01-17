@@ -23,33 +23,40 @@ type personTable struct {
 
 func main() {
 	router := gin.Default()
-
 	router.Use(cors.Default())
 
 	router.GET("/getData", func(c *gin.Context) {
-
 		c.JSON(http.StatusOK, gin.H{
 			"status":  http.StatusOK,
 			"payload": selectAllFromPersonTable(),
 		})
+	})
 
+	router.GET("/dataGet/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		c.String(http.StatusOK, "Hello %s", name)
 	})
 
 	router.POST("/postData", func(c *gin.Context) {
-		var login personTable
-		c.BindJSON(&login)
+
+		var user personTable
+
+		c.BindJSON(&user)
+
 		e := personTable{
-			ID:      login.ID,
-			Name:    login.Name,
-			Age:     login.Age,
-			Address: login.Address}
-		fmt.Println(e)
+			ID:      user.ID,
+			Name:    user.Name,
+			Age:     user.Age,
+			Address: user.Address}
+
 		err := insert(e)
+
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		fmt.Print("creato")
-		c.JSON(200, gin.H{"id": login.ID, "name": login.Name, "age": login.Age, "address": login.Address, "status": http.StatusOK})
+		c.JSON(200, gin.H{"id": user.ID, "name": user.Name, "age": user.Age, "address": user.Address, "status": http.StatusOK})
 
 	})
 
