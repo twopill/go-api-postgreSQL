@@ -1,6 +1,7 @@
 package main
 
 import (
+	mydata "./app"
 	"database/sql"
 	_ "encoding/json"
 	"fmt"
@@ -22,6 +23,7 @@ type personTable struct {
 }
 
 func main() {
+
 	router := gin.Default()
 	router.Use(cors.Default())
 
@@ -61,6 +63,7 @@ func main() {
 	})
 
 	router.Run(":8080")
+
 }
 
 func selectAllFromPersonTable() (person []personTable) {
@@ -117,7 +120,7 @@ func insert(p personTable) error {
 }
 
 func getConnection() *sql.DB {
-	dns := ""
+	dns := mydata.DataAccess
 	db, err := sql.Open("postgres", dns)
 	if err != nil {
 		log.Fatal("error: ", err)
