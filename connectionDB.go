@@ -22,10 +22,30 @@ type personTable struct {
 	Address string `json:"address"`
 }
 
+type accessdata struct {
+	User     string `json:"user"`
+	Password string `json:"password"`
+}
+
 func main() {
 
 	router := gin.Default()
 	router.Use(cors.Default())
+
+	router.POST("/auth/useraccess", func(c *gin.Context) {
+
+		var user accessdata
+		c.BindJSON(&user)
+
+		u := accessdata{
+			User:     user.User,
+			Password: user.Password}
+		if u.User == "" && u.Password == "" { // only for test
+			fmt.Println("entrato")
+			c.JSON(200, gin.H{"ACCESS_TOKEN": mydata.GenerateToken()})
+		}
+
+	})
 
 	router.GET("/getData", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -36,7 +56,11 @@ func main() {
 
 	router.GET("/dataGet/:name", func(c *gin.Context) {
 		name := c.Param("name")
-		c.String(http.StatusOK, "Hello %s", name)
+		if len(name) > 0 {
+			c.String(http.StatusOK, "Hello %s", name)
+		} else {
+			c.String(http.StatusNotFound, "Error 	")
+		}
 	})
 
 	router.POST("/postData", func(c *gin.Context) {
@@ -63,6 +87,34 @@ func main() {
 	})
 
 	router.Run(":8080")
+
+}
+
+func selectByName(name string) { //TODO: da vedere
+	var person2 []personTable
+	q := `SELECT * FROM person_table WHERE name = ?`
+	db := getConnection()
+	defer db.Close()
+
+	rows, err := db.Query(q)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		e := personTable{}
+		err = rows.Scan(
+			&e.ID,
+			&e.Name,
+			&e.Age,
+			&e.Address)
+		if err != nil {
+			return
+		}
+		person2 = append(person2, e)
+	}
+	fmt.Println(person2)
 
 }
 
